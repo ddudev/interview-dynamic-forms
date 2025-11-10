@@ -1,0 +1,115 @@
+<div class="form-filler-container">
+  @if (loading()) {
+    <div class="loading">Loading form...</div>
+  }
+
+  @if (!loading() && form()) {
+    <h1>Fill Form: {{ form()!.name }}</h1>
+    <p style="color: #718096; margin-bottom: 20px;">Entity Type: {{ form()!.entityType }}</p>
+
+    <form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+      <div class="form-fields">
+        @for (field of form()!.fields; track field.id || field.fieldName) {
+          <div class="form-group">
+            <label [for]="field.fieldName">
+              {{ field.label }}
+              @if (field.required) {
+                <span class="required-star">*</span>
+              }
+            </label>
+
+            <!-- Text Input -->
+            @if (field.fieldType === 'text' || field.fieldType === 'email') {
+              <input
+                [id]="field.fieldName"
+                [type]="field.fieldType"
+                [formControlName]="field.fieldName"
+                class="form-control"
+                [class.invalid]="isFieldInvalid(field.fieldName)"
+              />
+            }
+
+            <!-- Number Input -->
+            @if (field.fieldType === 'number') {
+              <input
+                [id]="field.fieldName"
+                type="number"
+                [formControlName]="field.fieldName"
+                class="form-control"
+                [class.invalid]="isFieldInvalid(field.fieldName)"
+              />
+            }
+
+            <!-- Date Input -->
+            @if (field.fieldType === 'date') {
+              <input
+                [id]="field.fieldName"
+                type="date"
+                [formControlName]="field.fieldName"
+                class="form-control"
+                [class.invalid]="isFieldInvalid(field.fieldName)"
+              />
+            }
+
+            <!-- Select Dropdown -->
+            @if (field.fieldType === 'select') {
+              <select
+                [id]="field.fieldName"
+                [formControlName]="field.fieldName"
+                class="form-control"
+                [class.invalid]="isFieldInvalid(field.fieldName)"
+              >
+                <option value="">Select an option</option>
+                @for (option of getFieldOptions(field); track option) {
+                  <option [value]="option">{{ option }}</option>
+                }
+              </select>
+            }
+
+            <!-- Textarea -->
+            @if (field.fieldType === 'textarea') {
+              <textarea
+                [id]="field.fieldName"
+                [formControlName]="field.fieldName"
+                class="form-control"
+                rows="4"
+                [class.invalid]="isFieldInvalid(field.fieldName)"
+              ></textarea>
+            }
+
+            @if (isFieldInvalid(field.fieldName)) {
+              <div class="error-message">
+                @if (getFieldControl(field.fieldName)?.errors?.['required']) {
+                  <span>{{ getErrorMessage(field.fieldName, 'required') }}</span>
+                }
+                @if (getFieldControl(field.fieldName)?.errors?.['email']) {
+                  <span>{{ getErrorMessage(field.fieldName, 'email') }}</span>
+                }
+                @if (getFieldControl(field.fieldName)?.errors?.['pattern']) {
+                  <span>{{ getErrorMessage(field.fieldName, 'pattern') }}</span>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          [disabled]="formGroup.invalid || submitting()"
+          class="btn btn-primary"
+        >
+          {{ submitting() ? 'Submitting...' : 'Submit' }}
+        </button>
+        <button
+          type="button"
+          (click)="routerService.navigate(['/entities'])"
+          class="btn btn-secondary"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  }
+</div>

@@ -1,0 +1,230 @@
+<div class="form-builder-container">
+  <h1>{{ formTitle() }}</h1>
+
+  <form [formGroup]="formForm" (ngSubmit)="saveForm()">
+    <div class="form-section">
+      <h2>Form Details</h2>
+      <div class="form-group">
+        <label for="name">Form Name:</label>
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          class="form-control"
+          [class.invalid]="formForm.get('name')?.invalid && formForm.get('name')?.touched"
+          placeholder="e.g., Event Registration"
+        />
+        @if (formForm.get('name')?.invalid && formForm.get('name')?.touched) {
+          <div class="error-message">
+            Form name is required
+          </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="entityType">Entity Type:</label>
+        <input
+          id="entityType"
+          type="text"
+          formControlName="entityType"
+          class="form-control"
+          [class.invalid]="formForm.get('entityType')?.invalid && formForm.get('entityType')?.touched"
+          placeholder="e.g., Event"
+        />
+        @if (formForm.get('entityType')?.invalid && formForm.get('entityType')?.touched) {
+          <div class="error-message">
+            Entity type is required
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Form Fields</h2>
+      <button type="button" (click)="addField()" class="btn btn-primary">
+        Add Field
+      </button>
+
+      <div class="fields-list">
+        @for (field of fields(); track field.id || field.fieldName; let i = $index) {
+          <div
+            class="field-item"
+            [class.editing]="editingFieldIndex() === i"
+          >
+          <div class="field-header">
+            <span class="field-number">{{ i + 1 }}</span>
+            <div class="field-actions">
+              <button
+                type="button"
+                (click)="moveFieldUp(i)"
+                [disabled]="i === 0"
+                class="btn btn-sm"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                (click)="moveFieldDown(i)"
+                [disabled]="i === fields.length - 1"
+                class="btn btn-sm"
+              >
+                ↓
+              </button>
+              <button
+                type="button"
+                (click)="removeField(i)"
+                class="btn btn-sm btn-danger"
+                title="Remove field"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+
+          <div class="field-content">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Field Name (internal):</label>
+                <input
+                  type="text"
+                  [(ngModel)]="field.fieldName"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="e.g., eventName"
+                  class="form-control"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Label:</label>
+                <input
+                  type="text"
+                  [(ngModel)]="field.label"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="e.g., Event Name"
+                  class="form-control"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Field Type:</label>
+                <select
+                  [(ngModel)]="field.fieldType"
+                  [ngModelOptions]="{ standalone: true }"
+                  class="form-control"
+                >
+                  @for (type of fieldTypes; track type) {
+                    <option [value]="type">{{ type }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="field.required"
+                    [ngModelOptions]="{ standalone: true }"
+                  />
+                  Required
+                </label>
+              </div>
+            </div>
+
+            @if (field.fieldType === 'select') {
+              <div class="form-group">
+              <label>Options (comma-separated):</label>
+              <input
+                type="text"
+                [value]="field.options?.options?.join(', ') || ''"
+                (input)="
+                  updateFieldOptions(field, $any($event.target).value)
+                "
+                placeholder="e.g., Option 1, Option 2, Option 3"
+                class="form-control"
+              />
+              </div>
+            }
+
+            <div class="form-group error-messages-section">
+              <label><strong>Custom Error Messages (optional):</strong></label>
+              <div class="error-messages-grid">
+                @if (field.required) {
+                  <div class="form-group">
+                    <label>Required field message:</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="field.errorMessages!.required"
+                      [ngModelOptions]="{ standalone: true }"
+                      placeholder="e.g., This field is required"
+                      class="form-control"
+                    />
+                  </div>
+                }
+                @if (field.fieldType === 'email') {
+                  <div class="form-group">
+                    <label>Email validation message:</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="field.errorMessages!.email"
+                      [ngModelOptions]="{ standalone: true }"
+                      placeholder="e.g., Please enter a valid email address"
+                      class="form-control"
+                    />
+                  </div>
+                }
+                @if (field.fieldType === 'number') {
+                  <div class="form-group">
+                    <label>Number validation message:</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="field.errorMessages!.number"
+                      [ngModelOptions]="{ standalone: true }"
+                      placeholder="e.g., Please enter a valid number"
+                      class="form-control"
+                    />
+                  </div>
+                }
+                <div class="form-group">
+                  <label>Pattern validation message:</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="field.errorMessages!.pattern"
+                    [ngModelOptions]="{ standalone: true }"
+                    placeholder="e.g., Invalid format"
+                    class="form-control"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        }
+      </div>
+
+      @if (isEmpty()) {
+        <div class="empty-state">
+          No fields added yet. Click "Add Field" to get started.
+        </div>
+      }
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        (click)="router.navigate(['/forms'])"
+        class="btn btn-secondary"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+            [disabled]="formForm.invalid || isEmpty()"
+        class="btn btn-success"
+      >
+        {{ saveButtonText() }}
+      </button>
+    </div>
+  </form>
+</div>

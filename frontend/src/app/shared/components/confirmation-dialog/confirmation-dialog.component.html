@@ -1,0 +1,21 @@
+@if (show()) {
+  <div class="confirmation-overlay" (click)="onBackdropClick($event)">
+    <div class="confirmation-dialog" (click)="$event.stopPropagation()">
+      <div class="confirmation-header">
+        <h3>{{ options()?.title }}</h3>
+      </div>
+      <div class="confirmation-body">
+        <p>{{ options()?.message }}</p>
+      </div>
+      <div class="confirmation-footer">
+        <button (click)="cancel()" class="btn btn-secondary">
+          {{ options()?.cancelText }}
+        </button>
+        <button (click)="confirm()" [class]="'btn ' + (options()?.confirmButtonClass || 'btn-danger')">
+          {{ options()?.confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+

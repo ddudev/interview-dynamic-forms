@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Form {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(255)
+  entityType String    @map("entity_type") @db.VarChar(100)
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  fields      FormField[]
+  versions    FormVersion[]
+  entities    Entity[]
+
+  @@map("forms")
+}
+
+model FormField {
+  id                Int       @id @default(autoincrement())
+  formId            Int       @map("form_id")
+  fieldName         String    @map("field_name") @db.VarChar(255)
+  fieldType         String    @map("field_type") @db.VarChar(50)
+  label             String    @db.VarChar(255)
+  required          Boolean   @default(false)
+  options           Json?     // For select fields: {"options": ["option1", "option2"]}
+  errorMessages     Json?     @map("error_messages") // Custom error messages: {"required": "Custom message", "email": "Custom email message"}
+  displayOrder      Int       @default(0) @map("display_order")
+  isActive          Boolean   @default(true) @map("is_active")
+  version           Int       @default(1)
+  replacedByFieldId Int?      @map("replaced_by_field_id")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  form                Form          @relation(fields: [formId], references: [id], onDelete: Cascade)
+  replacedByField     FormField?    @relation("FormFieldReplacement", fields: [replacedByFieldId], references: [id])
+  replacedFields      FormField[]   @relation("FormFieldReplacement")
+  entityValues        EntityValue[]
+
+  @@index([formId, isActive])
+  @@map("form_fields")
+}
+
+model FormVersion {
+  id            Int      @id @default(autoincrement())
+  formId        Int      @map("form_id")
+  versionNumber Int      @map("version_number")
+  formDefinition Json    @map("form_definition") // Complete snapshot: {fields: [{id, name, type, label, ...}]}
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  form     Form      @relation(fields: [formId], references: [id], onDelete: Cascade)
+  entities Entity[]
+
+  @@unique([formId, versionNumber])
+  @@index([formId])
+  @@map("form_versions")
+}
+
+model Entity {
+  id            Int      @id @default(autoincrement())
+  formId        Int      @map("form_id")
+  formVersionId Int      @map("form_version_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  form         Form          @relation(fields: [formId], references: [id])
+  formVersion  FormVersion   @relation(fields: [formVersionId], references: [id])
+  entityValues EntityValue[]
+
+  @@index([formId])
+  @@index([formVersionId])
+  @@map("entities")
+}
+
+model EntityValue {
+  id           Int      @id @default(autoincrement())
+  entityId     Int      @map("entity_id")
+  formFieldId  Int      @map("form_field_id")
+  fieldName    String   @map("field_name") @db.VarChar(255)
+  fieldLabel   String   @map("field_label") @db.VarChar(255)
+  fieldType    String   @map("field_type") @db.VarChar(50)
+  fieldOptions Json?    @map("field_options")
+  value        String   @db.Text
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  entity    Entity    @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  formField FormField @relation(fields: [formFieldId], references: [id])
+
+  @@unique([entityId, formFieldId])
+  @@index([entityId])
+  @@index([fieldName])
+  @@map("entity_values")
+}

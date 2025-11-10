@@ -1,0 +1,74 @@
+<div class="forms-list-container">
+  <div class="header">
+    <h1>Forms</h1>
+    <button (click)="navigateToFormBuilder()" class="btn btn-primary">
+      Create New Form
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading forms...</div>
+  }
+
+  @if (!loading()) {
+    @if (isEmpty()) {
+      <div class="empty-state">
+        <p>No forms created yet.</p>
+        <button (click)="navigateToFormBuilder()" class="btn btn-primary">
+          Create Your First Form
+        </button>
+      </div>
+    }
+
+    @if (hasForms()) {
+      <div class="forms-grid">
+        @for (form of forms(); track form.id) {
+          <div class="form-card">
+        <div class="form-card-header">
+          <h3>{{ form.name }}</h3>
+          <span class="entity-type">{{ form.entityType }}</span>
+        </div>
+        <div class="form-card-body">
+          <p class="form-info">
+            <strong>Fields:</strong> {{ form.fields?.length || 0 }}
+          </p>
+          <p class="form-info">
+            <strong>Submissions:</strong> {{ form._count?.entities || 0 }}
+          </p>
+          <p class="form-info">
+            <strong>Created:</strong>
+            {{ form.createdAt | date: 'short' }}
+          </p>
+        </div>
+        <div class="form-card-actions">
+          <button
+            (click)="navigateToFormDetail(form.id)"
+            class="btn btn-primary"
+          >
+            View Submissions
+          </button>
+          <button
+            (click)="navigateToFormFiller(form.id)"
+            class="btn btn-secondary"
+          >
+            Fill Form
+          </button>
+          <button
+            (click)="editForm(form.id, $event)"
+            class="btn btn-edit"
+          >
+            Edit
+          </button>
+          <button
+            (click)="deleteForm(form.id, form.name, $event)"
+            class="btn btn-danger"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+        }
+      </div>
+    }
+  }
+</div>

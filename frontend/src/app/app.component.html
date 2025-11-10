@@ -1,0 +1,17 @@
+<nav class="navbar">
+  <div class="nav-container">
+    <h2 class="nav-title">Dynamic Forms</h2>
+    <div class="nav-links">
+      <a routerLink="/forms" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Forms</a>
+      <a routerLink="/entities" routerLinkActive="active">All Entities</a>
+      <a routerLink="/forms/create" routerLinkActive="active">Create Form</a>
+    </div>
+  </div>
+</nav>
+
+<main class="main-content">
+  <router-outlet />
+</main>
+
+<app-notification></app-notification>
+<app-confirmation-dialog></app-confirmation-dialog>

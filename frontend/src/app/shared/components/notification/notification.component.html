@@ -1,0 +1,34 @@
+<div class="notification-container">
+  @for (notification of notifications(); track notification.id) {
+    <div
+      class="notification"
+      [class.notification-success]="notification.type === 'success'"
+      [class.notification-error]="notification.type === 'error'"
+      [class.notification-info]="notification.type === 'info'"
+      [class.notification-warning]="notification.type === 'warning'"
+      (click)="remove(notification.id)"
+    >
+      <div class="notification-content">
+        <span class="notification-icon">
+          @if (notification.type === 'success') {
+            <span>✓</span>
+          }
+          @if (notification.type === 'error') {
+            <span>✕</span>
+          }
+          @if (notification.type === 'info') {
+            <span>ℹ</span>
+          }
+          @if (notification.type === 'warning') {
+            <span>⚠</span>
+          }
+        </span>
+        <span class="notification-message">{{ notification.message }}</span>
+      </div>
+      <button class="notification-close" (click)="remove(notification.id); $event.stopPropagation()">
+        ×
+      </button>
+    </div>
+  }
+</div>
+

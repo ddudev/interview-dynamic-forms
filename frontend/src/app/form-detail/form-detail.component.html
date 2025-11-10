@@ -1,0 +1,107 @@
+<div class="form-detail-container">
+  <div class="header">
+    <div>
+      <button (click)="navigateBack()" class="btn btn-link">← Back to Forms</button>
+      @if (form()) {
+        <h1>{{ form()!.name }}</h1>
+        <p class="entity-type">Entity Type: {{ form()!.entityType }}</p>
+      }
+    </div>
+    <div class="header-actions">
+      <button (click)="navigateToFormFiller()" class="btn btn-primary">
+        Fill Form
+      </button>
+      <button (click)="editForm()" class="btn btn-secondary">
+        Edit Form
+      </button>
+      <button (click)="deleteForm()" class="btn btn-danger">
+        Delete Form
+      </button>
+    </div>
+  </div>
+
+  @if (loadingForm() && !hasForm()) {
+    <div class="loading">Loading form...</div>
+  }
+
+  @if (hasForm()) {
+    <div class="form-info-section">
+      <h2>Form Information</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <strong>Total Fields:</strong> {{ form()!.fields?.length || 0 }}
+        </div>
+        <div class="info-item">
+          <strong>Total Submissions:</strong> {{ total() }}
+        </div>
+        <div class="info-item">
+          <strong>Created:</strong> {{ form()!.createdAt | date: 'short' }}
+        </div>
+      </div>
+    </div>
+
+    <div class="submissions-section">
+      <h2>Submissions</h2>
+
+      @if (loadingEntities()) {
+        <div class="loading">Loading submissions...</div>
+      }
+
+      @if (!loadingEntities()) {
+        @if (isEmpty()) {
+          <div class="empty-state">
+            <p>No submissions yet.</p>
+            <button (click)="navigateToFormFiller()" class="btn btn-primary">
+              Create First Submission
+            </button>
+          </div>
+        }
+
+        @if (hasEntities()) {
+          <div class="table-container">
+            <table class="submissions-table">
+              <thead>
+                <tr>
+                  @for (column of columnsComputed(); track column) {
+                    <th>{{ getColumnLabel(column) }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (entity of entities(); track entity.id) {
+                  <tr>
+                    @for (column of columnsComputed(); track column) {
+                      <td>{{ getValue(entity, column) }}</td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (totalPages() > 1) {
+            <div class="pagination">
+            <button
+              (click)="goToPage(page() - 1)"
+              [disabled]="!canGoToPreviousPage()"
+              class="btn btn-sm"
+            >
+              Previous
+            </button>
+            <span class="page-info">
+              Page {{ page() }} of {{ totalPages() }} ({{ total() }} total)
+            </span>
+            <button
+              (click)="goToPage(page() + 1)"
+              [disabled]="!canGoToNextPage()"
+              class="btn btn-sm"
+            >
+              Next
+            </button>
+          </div>
+        }
+        }
+      }
+    </div>
+  }
+</div>

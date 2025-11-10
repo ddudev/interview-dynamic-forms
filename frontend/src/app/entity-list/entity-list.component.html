@@ -1,0 +1,68 @@
+<div class="entity-list-container">
+  <div class="header">
+    <h1>Entities</h1>
+    <button (click)="navigateToFormBuilder()" class="btn btn-primary">
+      Create New Form
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Loading entities...</div>
+  }
+
+  @if (!loading()) {
+    @if (isEmpty()) {
+      <div class="empty-state">
+        <p>No entities found.</p>
+        <button (click)="navigateToFormBuilder()" class="btn btn-primary">
+          Create Your First Form
+        </button>
+      </div>
+    }
+
+    @if (hasEntities()) {
+      <div class="table-container">
+        <table class="entities-table">
+          <thead>
+            <tr>
+              @for (column of columnsComputed(); track column) {
+                <th>{{ getColumnLabel(column) }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (entity of entities(); track entity.id) {
+              <tr>
+                @for (column of columnsComputed(); track column) {
+                  <td>{{ getValue(entity, column) }}</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (totalPages() > 1) {
+        <div class="pagination">
+        <button
+          (click)="goToPage(page() - 1)"
+          [disabled]="!canGoToPreviousPage()"
+          class="btn btn-sm"
+        >
+          Previous
+        </button>
+        <span class="page-info">
+          Page {{ page() }} of {{ totalPages() }} ({{ total() }} total)
+        </span>
+        <button
+          (click)="goToPage(page() + 1)"
+          [disabled]="!canGoToNextPage()"
+          class="btn btn-sm"
+        >
+          Next
+        </button>
+      </div>
+    }
+  }
+}
+</div>
